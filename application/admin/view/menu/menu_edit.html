@@ -1,0 +1,138 @@
+{extend name='general/base-layer' /}
+
+{block name='main'}
+	<form method="post" class="form form-horizontal">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>ID（不可修改）：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input value="{$menu.menu_id}" type="text" class="input-text" id="menu_id" name="menu_id" required readonly="true">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>菜单名称：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input value="{$menu.menu_name}" type="text" class="input-text" placeholder="菜单名称" id="menu_name" name="menu_name" minlength="2" maxlength="20" required>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">完整路由：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input value="{$menu.menu_route}" type="text" class="input-text" placeholder="举例：admin/index/index" id="menu_route" name="menu_route" minlength="2" maxlength="50">
+			</div>
+		</div>
+		<div class="row cl">
+			<lable class="form-label col-xs-4 col-sm-3">上级菜单：</lable>
+			<div class="formControls col-xs-8 col-sm-9">
+				<span class="select-box">
+				  <select class="select" size="1" id="menu_father_id" name="menu_father_id">
+				    <option value="0" selected>无</option>
+				    {volist name='list' id='vo'}
+				    	<option value="{$vo.menu_id}" {if condition="$vo.menu_id eq $menu.menu_father_id"} selected="selected" {/if}>
+				    		ID:{$vo.menu_id} - {$vo.menu_name}（{$vo.menu_visible},{$vo.menu_description}）
+				    	</option>
+				    {/volist}
+				  </select>
+				</span>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">菜单排序：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input value="{$menu.menu_sn}" type="text" class="input-text" placeholder="整数从小到大，默认0" id="menu_sn" name="menu_sn" />
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">菜单可见：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<div class='switch size-S' data-on="success" data-on-label="显示" data-off-label="隐藏">
+					<input type='checkbox' id='menu_visible' name='menu_visible' {if condition="$menu.menu_visible eq 1"} checked="checked" {/if} />
+    			</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">功能描述：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input value="{$menu.menu_description}" type="text" class="input-text" placeholder="简单描述菜单的功能" id="menu_description" name="menu_description">
+			</div>
+		</div>		
+		<div class="row cl">
+			<lable class="form-label col-xs-4 col-sm-3">菜单角色：</lable>
+			<div class="formControls col-xs-8 col-sm-9">
+				<label>
+					<input type="checkbox" id="checkall" />
+					<strong>全选</strong>
+				</label>
+				<div class="panel panel-default mt-5">
+					<div class="row cl panel-body">
+			    	{volist name='role_list' id='vo_r'}
+				    	<div class="col-xs-12 col-sm-4">
+				    		<label title="{$vo_r.role_description}">
+				    			<input type="checkbox" name="role_id[]" value="{$vo_r.role_id}" {in name='vo_r.role_id' value='$role_ids'} checked="true" {/in} />
+				    			{$vo_r.role_name}
+				    		</label>
+				    	</div>
+			    	{/volist}
+			    	</div>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<button type="submit" class="btn btn-success radius disabled">提交数据</button>
+			</div>
+		</div>
+	</form>
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/jquery.validate.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/validate-methods.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/messages_zh.js"/}
+
+<script type="text/javascript">
+	$(function() {
+		// 只有当表单中有数据变化时，提交按钮才可用
+		$("form").children().change(function() {
+			$(":submit").removeClass('disabled');
+		});
+
+		$("form").validate({
+			rules: {
+				menu_sn: {
+			      number: true
+			    }
+			},
+			submitHandler: function(form) {
+				// 当验证通过时执行ajax提交
+				$.ajax({
+	                type: "POST",	// POST方法提交
+	                url: "{:url('admin/menu/do_menu_edit')}",	// 执行的方法
+	                data: $("form").serialize(),	// 将表单控件的name属性序列化后提交
+	                dataType: "json",	// 数据类型为json
+	                success: function(data) {
+	                	// 当ajax请求执行成功时执行
+	                    if (data.status == true) {
+	                    	// 返回data对象中的status元素值为1表示数据插入成功
+	                        layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+							setTimeout(function() {
+								parent.location.reload();
+							}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+	                    } else {
+	                    	// 返回data对象的status值不为1，表示数据插入失败
+	                    	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+	                    	// 页面停留在这里，不再执行任何动作
+	                    }
+	                }
+            	});
+			}
+		});
+	});
+</script>
+{/block}
+
+{block name='css'}
+<!-- 编写本页特有的样式 -->
+<style type="text/css" media="screen">
+
+</style>
+{/block}

@@ -1,0 +1,137 @@
+{extend name='general/base-layer' /}
+
+{block name='main'}
+	<form method="post" class="form form-horizontal">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>ID（只读）：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$role.role_id}" id="role_id" name="role_id" readonly="true">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>角色名称：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$role.role_name}" placeholder="角色名称" id="role_name" name="role_name" minlength="2" maxlength="20" required>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">角色描述：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$role.role_description}" placeholder="简单描述角色" id="role_description" name="role_description">
+			</div>
+		</div>
+		<div class="row cl">
+			<lable class="form-label col-xs-4 col-sm-3">角色权限：</lable>
+			<div class="formControls col-xs-8 col-sm-9">
+				<label>
+					<input type="checkbox" id="checkall" />
+					<strong>全选</strong>
+				</label>
+			    {volist name='list' id='vo'}
+					<div class="panel panel-default mt-5">
+				    	<div class="col-xs-12 panel-header">
+				    		<label title="{$vo.menu_description}">
+				    			<input type="checkbox" name="menu_id[]" value="{$vo.menu_id}" {in name='vo.menu_id' value='$menu_ids'} checked="true" {/in} />
+				    			{$vo.menu_name}
+				    			{if condition="$vo.menu_visible eq '显示'"}
+				    				<span class="label label-success radius">{$vo.menu_visible}</span>
+				    			{/if}
+				    		</label>
+				    	</div>
+				    	<div class="row cl panel-body">
+							{volist name='vo.menu_child' id='vo_c'}
+								<div class="col-xs-12 col-sm-4 lh-30">
+									<label title="{$vo_c.menu_description}">
+										<input type="checkbox" name="menu_id[]" value="{$vo_c.menu_id}" {in name='vo_c.menu_id' value='$menu_ids'} checked="true" {/in} />
+										{$vo_c.menu_name}{if condition="$vo_c.menu_visible eq '显示'"}
+											<span class="label label-success radius">{$vo_c.menu_visible}</span>
+										{/if}
+									</label>
+								</div>
+							{/volist}
+				    	</div>
+					</div>
+			    {/volist}
+			</div>
+		</div>
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<button type="submit" class="btn btn-success radius disabled">提交数据</button>
+			</div>
+		</div>
+	</form>
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/jquery.validate.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/validate-methods.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/messages_zh.js"/}
+
+<script type="text/javascript">
+	$(function() {
+		// 全选
+		$("#checkall:checkbox").on("click",function() {
+			$(this).parents(".formControls").find(".panel input:checkbox").prop("checked", $("#checkall:checkbox").prop("checked"));
+		});
+		// 面板全选
+		$(".panel-header input:checkbox").on("click",function() {
+			var checkedattr = $(this).prop("checked");
+			$(this).parents(".panel").find(".panel-body input:checkbox").prop("checked", checkedattr);
+		});
+		// 选子项时父项必选，子项全未选时父项也不选
+		$(".panel-body input:checkbox").on("click",function() {
+			var checkedattr = $(this).prop("checked");
+			if(checkedattr) {
+				$(this).parents(".panel").find(".panel-header input:checkbox").prop("checked", checkedattr);
+			} else {
+				$(this).parents(".panel-body").find("input:checkbox").each(function() {
+					if($(this).prop("checked")) {
+						checkedattr = true;
+						return false;
+					}
+				});
+				if(!checkedattr) {
+					$(this).parents(".panel").find(".panel-header input:checkbox").prop("checked", checkedattr)
+				}
+			}
+		});
+		// 只有当表单中有数据变化时，提交按钮才可用
+		$("form").children().change(function() {
+			$(":submit").removeClass('disabled');
+		});
+
+		$("form").validate({
+			submitHandler: function(form) {
+				// 当验证通过时执行ajax提交
+				$.ajax({
+	                type: "POST",	// POST方法提交
+	                url: "{:url('admin/role/do_role_edit')}",	// 执行的方法
+	                data: $("form").serialize(),	// 将表单控件的name属性序列化后提交
+	                dataType: "json",	// 数据类型为json
+	                success: function(data) {
+	                	// 当ajax请求执行成功时执行
+	                    if (data.status == true) {
+	                    	// 返回data对象中的status元素值为1表示数据插入成功
+	                        layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+							setTimeout(function() {
+								parent.location.reload();
+							}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+	                    } else {
+	                    	// 返回data对象的status值不为1，表示数据插入失败
+	                    	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+	                    	// 页面停留在这里，不再执行任何动作
+	                    }
+	                }
+            	});
+			}
+		});
+	});
+</script>
+{/block}
+
+{block name='css'}
+<!-- 编写本页特有的样式 -->
+<style type="text/css" media="screen">
+
+</style>
+{/block}

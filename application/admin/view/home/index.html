@@ -1,0 +1,74 @@
+﻿{extend name='general/base' /}
+{block name='nav'}
+	<span class="c-666">我的桌面</span> 
+{/block}
+{block name='main'}
+	<p class="f-20 text-success">{$Think.session.admin_infor.admin_name}，欢迎使用{$title}</p>
+	<p>登录次数：{$Think.session.admin_infor.admin_login_count} </p>
+	<p>上次登录IP：{$Think.session.admin_infor.admin_login_ip}  上次登录时间：{$Think.session.admin_infor.admin_login_time}</p>
+	<table class="table table-border table-bordered table-bg mt-20">
+		<thead>
+			<tr>
+				<th colspan="2" scope="col">服务器信息</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th width="30%">服务器计算机名</th>
+				<td>{$Request.host}</td>
+			</tr>
+			<tr>
+				<td>服务器IP地址</td>
+				<td>{:gethostbyname($_SERVER['SERVER_NAME'])}</td>
+			</tr>
+			<tr>
+				<th>服务器时间</th>
+				<td>{:date("Y年n月j日 H:i:s")}</td>
+			</tr>
+			<tr>
+				<th>服务器运行环境 </th>
+				<td>{:$_SERVER["SERVER_SOFTWARE"]}</td>
+			</tr>
+			<tr>
+				<th>服务器操作系统 </th>
+				<td>{:php_uname()}</td>
+			</tr>
+			<tr>
+				<th>PHP版本 </th>
+				<td>{$Think.const.PHP_VERSION}</td>
+			</tr>
+			<tr>
+				<th>PHP运行方式</th>
+				<td>{:php_sapi_name()}</td>
+			</tr>
+			<tr>
+				<th>ThinkPHP版本</th>
+				<td>{:THINK_VERSION}</td>
+			</tr>
+			<tr>
+				<th>Mysql版本</th>
+				<td>{$mysqlversion}</td>
+			</tr>
+			<tr>
+				<th>执行时间限制</th>
+				<td>{:ini_get('max_execution_time').'秒'}</td>
+			</tr>
+			<tr>
+				<th>服务器语言</th>
+				<td>{:$_SERVER['HTTP_ACCEPT_LANGUAGE']}</td>
+			</tr>
+			<tr>
+				<th>服务器根目录 </th>
+				<td>{$_SERVER['DOCUMENT_ROOT']}</td>
+			</tr>
+			<tr>
+				<th>当前访问路径</th>
+				<td>{$Request.path}</td>
+			</tr>	
+			<tr>
+				<th>最大上传限制</th>
+				<td>{:ini_get("file_uploads") ? ini_get("upload_max_filesize") : "Disabled"}</td>
+			</tr>	
+		</tbody>
+	</table>
+{/block}

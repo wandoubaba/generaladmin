@@ -1,0 +1,131 @@
+{extend name='general/base'/}
+
+{block name='nav'}
+<span class="c-666">{$pagetitle}</span> 
+<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+{/block}
+
+{block name='main'}
+<p class="f-20 text-success">
+	{$pagetitle}
+</p>
+<form method="post" class="form form-horizontal">
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">账号：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<strong>{$Think.session.admin_infor.admin_name}</strong>
+		</div>
+	</div>
+	<div class="row cl">
+		<lable class="form-label col-xs-4 col-sm-3">角色：</lable>
+		<div class="formControls col-xs-8 col-sm-9">
+			<strong>{$Think.session.admin_role.role_name?$Think.session.admin_role.role_name:'未授权'}</strong>
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">账号创建时间：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			{$Think.session.admin_infor.create_time}
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">登录次数：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			{$Think.session.admin_infor.admin_login_count}
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">上次登录时间：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			{$Think.session.admin_infor.admin_login_time}
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">上次登录IP：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			{$Think.session.admin_infor.admin_login_ip}
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">上次修改时间：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			{$Think.session.admin_infor.update_time}
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">邮箱：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" placeholder="管理员使用的邮箱" value="{$Think.session.admin_infor.admin_email}" id="admin_email" name="admin_email" email />
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">电话：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" placeholder="管理员使用的联系电话" value="{$Think.session.admin_infor.admin_telephone}" id="admin_telephone" name="admin_telephone" isTel />
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">说明：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" placeholder="简单描述管理员" value="{$Think.session.admin_infor.admin_description}" id="admin_description" name="admin_description" />
+		</div>
+	</div>		
+	<div class="row cl">
+		<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+			<button type="submit" class="btn btn-success radius disabled">修改资料</button>
+		</div>
+	</div>
+</form>
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/laypage/1.2/laypage.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/jquery.validate.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/validate-methods.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/messages_zh.js"/}
+
+<script type="text/javascript">
+	$(function() {
+		// 只有当表单中有数据变化时，提交按钮才可用
+		$("form").children().change(function() {
+			$("button").removeClass('disabled');
+		});
+
+		$("form").validate({
+			rules: {
+				admin_email:{email:true},
+				admin_telephone:{isTel:true}
+			},
+			submitHandler: function(form) {
+				// 当验证通过时执行ajax提交
+				$.ajax({
+	                type: "POST",	// POST方法提交
+	                url: "{:url('admin/myself/do_infor_edit')}",	// 执行的方法
+	                data: $("form").serialize(),	// 将表单控件的name属性序列化后提交
+	                dataType: "json",	// 数据类型为json
+	                success: function(data) {
+	                	// 当ajax请求执行成功时执行
+	                    if (data.status == true) {
+	                    	// 返回data对象中的status元素值为1表示数据插入成功
+	                        layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+							setTimeout(function() {
+								top.location.reload();
+							}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+	                    } else {
+	                    	// 返回data对象的status值不为1，表示数据插入失败
+	                    	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+	                    	// 页面停留在这里，不再执行任何动作
+	                    }
+	                }
+            	});
+			}
+		});
+	});
+</script>
+{/block}
+
+{block name='css'}
+<style type="text/css" media="screen">
+	
+</style>
+{/block}

@@ -1,0 +1,136 @@
+{extend name='general/base'/}
+
+{block name='nav'}
+<span class="c-666">{$pagetitle}</span> 
+<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+{/block}
+
+{block name='main'}
+<p class="f-20">
+	{$pagetitle}
+</p>
+		<div class="cl pd-5 bg-1 bk-gray mt-20">
+			<span class="l"> 
+				<a href="javascript:;" onclick="role_multidelete('{:url("admin/roleControl/do_role_multidelete")}')"  class="btn btn-danger radius"><i class="Hui-iconfont">&#xe6e2;</i> 批量删除</a> 
+				<a href="javascript:;" onclick="layer_show('添加角色','{:url("admin/role/role_add")}','800','500')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 新增数据</a> 
+			</span>
+			<span class="r">共有数据：<strong>{$count}</strong> 条</span>
+		</div>
+		<table class="table table-border table-bordered table-bg" style="white-space:nowrap">
+			<thead>
+				<tr>
+					<th scope="col" colspan="8">角色（权限）清单</th>
+				</tr>
+				<tr class="text-c">
+					<!-- h-ui.js中实现全选功能的脚本 
+						/*全选*/
+						$("table thead th input:checkbox").on("click",function() {
+							$(this).closest("table").find("tr > td:first-child input:checkbox").prop("checked", $("table thead th input:checkbox").prop("checked"));
+						});
+					 -->
+					<th><input type="checkbox" name="" value=""></th>
+					<th>ID</th>
+					<th>角色名</th>
+					<th>角色描述</th>
+					<th>操作权限</th>
+					<th>创建时间</th>
+					<th>修改时间</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			{volist name='list' id='vo'}
+				<tr class="text-c" title="{$vo.role_description}">
+					<td><input type="checkbox" value="{$vo.role_id}" name="to_multidelete[]"></td>
+					<td>{$vo.role_id}</td>
+					<td><span class="name">{$vo.role_name}</span></td>
+					<td>{$vo.role_description}</td>
+					<td style="white-space:normal" class="text-l">
+						{volist name='vo.child' id='vo_c'}
+							<span title="{$vo_c.menu_description}">{$vo_c.menu_name}</span> /
+						{/volist}
+					</td>
+					<td style="white-space:normal">{$vo.create_time}</td>
+					<td style="white-space:normal">{$vo.update_time}</td>
+					<td class="td-manage">
+						<a title="编辑" href="javascript:;" onclick="layer_show('编辑角色','{:url("admin/role/role_edit",["id"=>$vo.role_id])}','800','500');" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe647;</i></a> 
+						<a title="删除" href="javascript:;" onclick="role_delete(this,'{:url("admin/role/do_role_delete",["id"=>$vo.role_id])}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+					</td>
+				</tr>
+			{/volist}
+			</tbody>
+		</table>
+		
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/laypage/1.2/laypage.js"/}
+<script type="text/javascript">
+// 删除角色
+function role_delete(obj, url) {
+	// 为了友好，取到要操作模块的“菜单名称”字段，要在提示语中使用
+	var name = $(obj).parents("tr").find(".name").html();
+	// 用layer.confirm插件进行操作确认
+	layer.confirm("确认要删除“"+name+"”吗？<br/>角色对应的管理员不会被删除。", function() {
+		// 当layer.confirm被确认后开始提交操作
+		// $.get(url, data, success)
+		$.get(url, function(data) {
+			if(data.status==1) {
+				// 返回状态码是1，提示操作成功，并刷新页面
+				layer.msg(data.message, {icon:6, time:1500});
+				setTimeout(function() {
+					window.location.reload();
+				}, 2000);
+			} else {
+				// 返回状态码不是1，提示失败信息，不再刷新页面
+				layer.msg(data.message, {icon:5, time:3000});
+			}
+		});	
+	});
+}
+
+// 批量删除
+function role_multidelete(url) {
+	// 定义一个数组用于保存已被选中的checkbox
+	var ids = new Array();
+	// 遍历名为to_multidelete[]的checkbox
+	$("input[name='to_multidelete[]").each(function() {
+		if($(this).is(":checked")) {
+			// 把被选中的checkbox的value值保存到module_ids中
+			ids.push($(this).val());
+		}
+	});
+	// 判断一下数组的长度，如果是0，则不用麻烦服务器了
+	if(ids.length == 0) {
+		layer.msg("没有选中任何数据", {icon:5, time:2000});
+	} else {
+		// 确实有被选中的记录，页面进行一次确认
+		layer.confirm("确定要删除这些数据吗？<br/>角色对应的管理员不会被删除。", function() {
+			// 用$.post()方法去调用控制器中的方法
+			// $.post(url,data,success)
+			$.post(
+				url
+				, {ids: ids}
+				, function(data) {
+					if(data.status==0) {
+						layer.msg(data.message, {icon:5, time:3000});
+					} else {
+						layer.msg(data.message, {icon:6, time:2000});
+						
+					}
+					setTimeout(function() {
+							window.location.reload();
+						}, 3000);
+			});
+		});
+	}
+}
+
+</script>
+{/block}
+
+{block name='css'}
+<style type="text/css" media="screen">
+	
+</style>
+{/block}

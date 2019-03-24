@@ -1,0 +1,45 @@
+<!--_header 作为公共模版分离出去-->
+<header class="navbar-wrapper">
+	<div class="navbar navbar-fixed-top">
+		<div class="container-fluid cl">
+			<!-- 宽屏时显示的标题 -->
+			<a class="logo navbar-logo f-l mr-10 hidden-xs" href="{:url('admin/home/index')}">{$title|default='通用管理后台'}</a>
+			<!-- 窄屏时显示的标题 -->
+			<a class="logo navbar-logo-m f-l mr-10 visible-xs" href="{:url('admin/home/index')}">{$title|default='通用管理后台'}</a> 
+			<!-- 宽屏时显示版本号，窄屏时不显示 -->
+			<span class="logo navbar-slogan f-l mr-10 hidden-xs">v1.0</span> 
+			<!-- 窄屏时显示的菜单图标 -->
+			<a aria-hidden="false" class="nav-toggle Hui-iconfont visible-xs" href="javascript:;">&#xe667;</a>
+			<!-- Begin 快捷操作菜单 -->
+			<!-- <nav class="nav navbar-nav">
+				<ul class="cl">
+					<li class="dropDown dropDown_hover"><a href="javascript:;" class="dropDown_A"><i class="Hui-iconfont">&#xe600;</i> 新增 <i class="Hui-iconfont">&#xe6d5;</i></a>
+						<ul class="dropDown-menu menu radius box-shadow">
+							<li><a href="javascript:;" onclick="article_add('添加资讯','article-add.html')"><i class="Hui-iconfont">&#xe616;</i> 资讯</a></li>
+							<li><a href="javascript:;" onclick="picture_add('添加资讯','picture-add.html')"><i class="Hui-iconfont">&#xe613;</i> 图片</a></li>
+							<li><a href="javascript:;" onclick="product_add('添加资讯','product-add.html')"><i class="Hui-iconfont">&#xe620;</i> 产品</a></li>
+							<li><a href="javascript:;" onclick="member_add('添加用户','member-add.html','','510')"><i class="Hui-iconfont">&#xe60d;</i> 用户</a></li>
+						</ul>
+					</li>
+				</ul>
+			</nav> -->
+			<!-- End 快捷操作菜单 -->
+			<!-- Begin 管理员操作菜单 -->
+			<nav id="Hui-userbar" class="nav navbar-nav navbar-userbar hidden-xs">
+				<ul class="cl">
+					<li> <a href="{:url('index/index/index')}" target="_blank">前台首页</a>
+					<li class="dropDown dropDown_hover"> <a href="#" class="dropDown_A">{$Think.session.admin_infor.admin_name} <i class="Hui-iconfont">&#xe6d5;</i></a>
+						<ul class="dropDown-menu menu radius box-shadow">
+							<li><a href="{:url('admin/myself/index')}">个人信息</a></li>
+							<li><a href="{:url('admin/myself/password')}">修改密码</a></li>
+							<li><a href="{:url('admin/myself/do_logout')}">安全退出</a></li>
+						</ul>
+					</li>
+					<li>{$Think.session.admin_role.role_name?$Think.session.admin_role.role_name:'未授权'}</li>
+				</ul>
+			</nav>
+			<!-- End 管理员操作菜单 -->
+		</div>
+	</div>
+</header>
+<!--/_header 作为公共模版分离出去-->

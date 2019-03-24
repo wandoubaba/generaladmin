@@ -1,0 +1,164 @@
+{extend name='general/base'/}
+
+{block name='nav'}
+<span class="c-666">{$pagetitle}</span> 
+<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+{/block}
+
+{block name='main'}
+<p class="f-20">
+	{$pagetitle}
+</p>
+<form class="form">
+<table class="table table-border table-bordered table-bg table-hover mt-20" style="white-space: nowrap;">
+	<thead class="text-c">
+		<tr>
+			<th>名称（只读）</th>
+			<th>键（只读）</th>
+			<th>值</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody class="list">
+		{volist name='list' id='vo'}
+			<tr>
+				<th width="110">
+					<input class="input-text radius c-666 name" type="text" value="{$vo.config_name}" name="config_name" readonly="true" required/>
+				</th>
+				<td width="140">
+					<input class="input-text radius c-666" type="text" value="{$vo.config_key}" name="config_key" readonly="true" required/>
+				</td>
+				<td>
+					<textarea name="config_value" class="textarea radius" maxlength="4000">{$vo.config_value}</textarea>
+				</td>
+				<td class="text-c" width="60">
+					<div><button name="button-save" type="button" onclick="config_edit(this,'{:url("admin/config/do_config_edit")}')" class="btn btn-success radius disabled" disabled="disabled">保存</button></div>
+					{if condition="$vo.config_deletable eq 1"}
+					<div class="mt-5"><button type="button" onclick="config_delete(this,'{:url("admin/config/do_config_delete",["key"=>$vo.config_key])}')" class="btn btn-danger radius">删除</button></div>
+					{/if}
+				</td>
+			</tr>
+		{/volist}
+	</tbody>
+	<thead>
+		<tr class="text-l">
+			<th colspan="4">添加新配置项</th>
+		</tr>
+			<tr>
+				<th><input class="input-text radius" type="text" name="config_name" placeholder="配置项的名称" required rangelength="[2,20]"/></th>
+				<th><input class="input-text radius" type="text" name="config_key" placeholder="配置项的系统键名" required rangelength="[2,20]"/></th>
+					
+				<th><textarea name="config_value" class="textarea radius" maxlength="4000" placeholder="配置项的值（支持html、css和js）"></textarea></th>
+				<th class="text-c">
+					<button type="button" class="btn btn-warning radius" onclick="config_add(this,'{:url("admin/config/do_config_add")}')">新增</button>
+				</th>
+			</tr>
+	</thead>
+</table>
+</form>
+{/block}
+
+{block name='js'}
+<script type="text/javascript">
+// 删除
+function config_delete(obj, url) {
+	// 为了友好，取到要操作模块的“菜单名称”字段，要在提示语中使用
+	var name = $(obj).parents("tr").find(".name").val();
+	// 用layer.confirm插件进行操作确认
+	layer.confirm("确认要删除“"+name+"”吗？", function() {
+		// 当layer.confirm被确认后开始提交操作
+		$.get(url, function(data) {
+			if(data.status==1) {
+				// 返回状态码是1，提示操作成功，并刷新页面
+				layer.msg(data.message, {icon:6, time:1500});
+				setTimeout(function() {
+					window.location.reload();
+				}, 2000);
+			} else {
+				// 返回状态码不是1，提示失败信息，不再刷新页面
+				layer.msg(data.message, {icon:5, time:3000});
+			}
+		});	
+	});
+}
+// 修改
+function config_edit(obj, url) {
+	// 为了友好，取到要操作模块的“菜单名称”字段，要在提示语中使用
+	var name = $(obj).parents("tr").find(".name").val();
+	// 用layer.confirm插件进行操作确认
+	layer.confirm("确认要保存对“"+name+"”的更改吗？", function() {
+		var name = $(obj).parents("tr").find("[name='config_name']").val();
+		var key = $(obj).parents("tr").find("[name='config_key']").val();
+		var value = $(obj).parents("tr").find("[name='config_value']").val();
+		$.ajax({
+	        type: "POST",	// POST方法提交
+	        url: url,	// 执行的方法
+	        data: {
+	        	config_name : name,
+	        	config_key : key,
+	        	config_value : value
+	        },	// 将表单控件的name属性序列化后提交
+	        dataType: "json",	// 数据类型为json
+	        success: function(data) {
+	        	// 当ajax请求执行成功时执行
+	            if (data.status == true) {
+	            	// 返回data对象中的status元素值为1表示数据插入成功
+	                layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+					setTimeout(function() {
+						parent.location.reload();
+					}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+	            } else {
+	            	// 返回data对象的status值不为1，表示数据插入失败
+	            	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+	            	// 页面停留在这里，不再执行任何动作
+	            }
+	        }
+		});
+	});
+}
+// 新增
+function config_add(obj, url) {
+	var name = $(obj).parents("tr").find("[name='config_name']").val();
+	var key = $(obj).parents("tr").find("[name='config_key']").val();
+	var value = $(obj).parents("tr").find("[name='config_value']").val();
+	$.ajax({
+        type: "POST",	// POST方法提交
+        url: url,	// 执行的方法
+        data: {
+        	config_name : name,
+        	config_key : key,
+        	config_value : value
+        },	// 将表单控件的name属性序列化后提交
+        dataType: "json",	// 数据类型为json
+        success: function(data) {
+        	// 当ajax请求执行成功时执行
+            if (data.status == true) {
+            	// 返回data对象中的status元素值为1表示数据插入成功
+                layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+				setTimeout(function() {
+					parent.location.reload();
+				}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+            } else {
+            	// 返回data对象的status值不为1，表示数据插入失败
+            	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+            	// 页面停留在这里，不再执行任何动作
+            }
+        }
+	});
+}
+
+$(function() {
+	// 只有当本行数据变化时，提交按钮才可用
+	$("tbody.list").children().bind('input propertychange', function() {
+		// 这个$(this)指的是$("tbody.list").child()，在本页是发生变化的tr
+		$(this).find("[name='button-save']").removeClass("disabled").removeAttr("disabled");
+	});
+});
+</script>
+{/block}
+
+{block name='css'}
+<style type="text/css" media="screen">
+	
+</style>
+{/block}

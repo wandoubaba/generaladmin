@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+{include file='common@general/meta' /}
+{include file='common@general/css'/}
+
+{block name='seo'}
+	{include file='common@general/seo' /}
+{/block}
+</head>
+<body>
+	<article class="cl pd-20">
+	{block name='main'}
+		{// 页面主体，已经在artical标签内}
+	{/block}
+	</article>
+{include file='common@general/js'/}
+{include file='general/js'/}
+
+{block name='js'}
+	{// 页面自定义脚本}
+{/block}
+
+{block name='css'}
+	{// 页面自定义样式}
+{/block}
+</body>
+</html>

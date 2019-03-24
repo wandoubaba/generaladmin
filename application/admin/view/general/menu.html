@@ -1,0 +1,37 @@
+<!--_menu 作为公共模版分离出去-->
+<aside class="Hui-aside" style="z-index:101">
+	<div class="menu_dropdown bk_2">
+		<dl>
+			<dt><i class="Hui-iconfont">&#xe68e;</i> 欢迎使用<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+			<dd>
+				<ul>
+					<li><a href="{:url('admin/home/index')}" title="系统首页">系统首页</a></li>
+				</ul>
+			</dd>
+		</dl>
+		{volist name="menu_list" id="vo"}
+		<dl>
+			<dt id="{$vo.menu_name}"><i class="Hui-iconfont">&#xe68e;</i> {$vo.menu_name}<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+			<dd>
+				<ul>
+					{volist name="vo.menu_child" id="vo_c"}
+					<li><a href="{:url($vo_c.menu_route)}" title="{$vo_c.menu_description}">{$vo_c.menu_name}</a></li>
+					{/volist}
+				</ul>
+			</dd>
+		</dl>
+		{/volist}
+		<dl>
+			<dt><i class="Hui-iconfont">&#xe68e;</i> 我的账号<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+			<dd>
+				<ul>
+					<li><a href="{:url('admin/myself/index')}" title="个人信息">个人信息</a></li>
+					<li><a href="{:url('admin/myself/password')}" title="修改密码">修改密码</a></li>
+					<li><a href="{:url('admin/myself/do_logout')}" title="安全退出">安全退出</a></li>
+				</ul>
+			</dd>
+		</dl>
+	</div>
+</aside>
+<div class="dislpayArrow hidden-xs"><a class="pngfix" href="javascript:void(0);" onClick="displaynavbar(this)"></a></div>
+<!--/_menu 作为公共模版分离出去-->

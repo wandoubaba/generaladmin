@@ -1,0 +1,154 @@
+{extend name='general/base-layer' /}
+
+{block name='main'}
+	<form method="post" class="form form-horizontal">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>ID（只读）：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$admin.admin_id}" id="admin_id" name="admin_id" readonly="true" />
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>账号（只读）：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" placeholder="字母、数字、下划线、减号，4到25位之间" value="{$admin.admin_name}" id="admin_name" name="admin_name" readonly="true" />
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">密码：</label>
+			<div class="col-xs-8 col-sm-9">
+				<a href="{:url("admin/admin/admin_password",["id"=>$admin.admin_id])}">要修改密码请点这里</a>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">邮箱：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" placeholder="管理员使用的邮箱" value="{$admin.admin_email}" id="admin_email" name="admin_email">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">电话：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" placeholder="管理员使用的联系电话" value="{$admin.admin_telephone}" id="admin_telephone" name="admin_telephone">
+			</div>
+		</div>
+		<div class="row cl">
+			<lable class="form-label col-xs-4 col-sm-3">角色：</lable>
+			<div class="formControls col-xs-8 col-sm-9">
+				<span class="select-box">
+					<table style="white-space: nowrap;" class="table table-border table-bordered table-bg">
+					<thead>
+						<tr class="text-c" >
+							<th>选择</th>
+							<th>ID</th>
+							<th>角色名</th>
+							<th>角色权限</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="text-c" >
+				    		<td><input type="radio" value="" id="admin_role_id0" name="admin_role_id" {if condition="$admin.admin_role_id eq ''"} checked="true" {/if} /></td>
+				    		<td></td>
+				    		<td><label for="admin_role_id0">无</label></td>
+				    		<td class="text-l"><label for="admin_role_id0">如果先不设定角色，可以选这个</label></td>
+						</tr>
+				    	{volist name='list' id='vo'}
+					    	<tr class="text-c" title="{$vo.role_description}">
+					    		<td><input type="radio" id="admin_radio_id{$vo.role_id}" value="{$vo.role_id}" name="admin_role_id" {if condition="$admin.admin_role_id eq $vo.role_id"} checked="true" {/if} /></td>
+					    		<td><label for="admin_radio_id{$vo.role_id}">{$vo.role_id}</label></td>
+					    		<td><label for="admin_radio_id{$vo.role_id}">{$vo.role_name}</label></td>
+					    		<td class="text-l" style="white-space: normal;">
+					    			<label for="admin_radio_id{$vo.role_id}">
+						    		{volist name='vo.child' id='vo_c'}
+						    			{$vo_c.menu_name}/
+						    		{/volist}
+						    		</label>
+					    		</td>
+							</tr>
+						</label>
+				    	{/volist}
+					</tbody>
+					</table>
+				</span>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">可用状态：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<div class='switch size-S' data-on="success" data-on-label="正常" data-off-label="禁用">
+					<input type='checkbox' id='admin_status' name='admin_status' {if condition="$admin.admin_status eq '正常'"} checked="checked" {/if} />
+    			</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">说明：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" placeholder="简单描述管理员" value="{$admin.admin_description}" id="admin_description" name="admin_description">
+			</div>
+		</div>		
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<button type="submit" class="btn btn-success radius disabled">提交数据</button>
+			</div>
+		</div>
+	</form>
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/jquery.validate.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/validate-methods.js"/}
+{js href="__ROOT__/lib/jquery.validation/1.14.0/messages_zh.js"/}
+
+<script type="text/javascript">
+	$(function() {
+		// 只有当表单中有数据变化时，提交按钮才可用
+		$("form").children().change(function() {
+			$(":submit").removeClass('disabled');
+		});
+
+		$("form").validate({
+			rules : {
+				admin_password_confirm: {
+      				equalTo : "#admin_password"
+    			},
+    			admin_email: {
+    				email : true
+    			},
+    			admin_telephone: {
+    				isTel : true
+    			}
+			},
+			submitHandler: function(form) {
+				// 当验证通过时执行ajax提交
+				$.ajax({
+	                type: "POST",	// POST方法提交
+	                url: "{:url('admin/admin/do_admin_edit')}",	// 执行的方法
+	                data: $("form").serialize(),	// 将表单控件的name属性序列化后提交
+	                dataType: "json",	// 数据类型为json
+	                success: function(data) {
+	                	// 当ajax请求执行成功时执行
+	                    if (data.status == true) {
+	                    	// 返回data对象中的status元素值为1表示数据插入成功
+	                        layer.msg(data.message, {icon: 6, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+							setTimeout(function() {
+								parent.location.reload();
+							}, 2000);	//2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+	                    } else {
+	                    	// 返回data对象的status值不为1，表示数据插入失败
+	                    	layer.msg(data.message, {icon: 5, time: 2000});	// 使用H-ui的浮动提示框，2秒后自动消失
+	                    	// 页面停留在这里，不再执行任何动作
+	                    }
+	                }
+            	});
+			}
+		});
+	});
+</script>
+{/block}
+
+{block name='css'}
+<!-- 编写本页特有的样式 -->
+<style type="text/css" media="screen">
+
+</style>
+{/block}

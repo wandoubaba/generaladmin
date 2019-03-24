@@ -1,0 +1,220 @@
+{extend name='general/base'/}
+
+{block name='nav'}
+<span class="c-666">{$pagetitle}</span> 
+<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+{/block}
+
+{block name='main'}
+<p class="f-20">
+	{$pagetitle}
+</p>
+		<div class="cl pd-5 bg-1 bk-gray mt-20">
+			<span class="l"> 
+				<a href="javascript:;" onclick="item_multidelete('{:url("admin/menu/do_menu_multidelete")}')" class="btn btn-danger radius"><i class="Hui-iconfont">&#xe6e2;</i> 批量删除</a> 
+				<a href="javascript:;" onclick="layer_show('添加菜单','{:url("admin/menu/menu_add")}','800','500')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 新增数据</a> 
+			</span>
+			<span class="r">共有数据：<strong>{$count}</strong> 条</span>
+		</div>
+		<table class="table table-border table-bordered table-bg table-hover" style="white-space:nowrap">
+			<thead>
+				<tr>
+					<th scope="col" colspan="11">菜单（功能）清单</th>
+				</tr>
+				<tr class="text-c">
+					<!-- h-ui.js中实现全选功能的脚本 
+						/*全选*/
+						$("table thead th input:checkbox").on("click",function() {
+							$(this).closest("table").find("tr > td:first-child input:checkbox").prop("checked", $("table thead th input:checkbox").prop("checked"));
+						});
+					 -->
+					<th><input type="checkbox" name="" value=""></th>
+					<th>ID</th>
+					<th>菜单名</th>
+					<th>路由</th>
+					<th>上级</th>
+					<th>排序</th>
+					<th>可见</th>
+					<th>角色</th>
+					<th>创建时间</th>
+					<th>修改时间</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			{volist name='list' id='vo'}
+				<tr class="text-c warning" title="{$vo.menu_description}">
+					<td><input type="checkbox" value="{$vo.menu_id}" name="to_multidelete[]"></td>
+					<td>{$vo.menu_id}</td>
+					<td class="text-l"><span class="name">{$vo.menu_name}</span></td>
+					<td class="text-l">{$vo.menu_route}</td>
+					<td>{$vo.menu_father_id}</td>
+					<td>{$vo.menu_sn}</td>
+					<td>
+						{if condition="$vo.menu_visible eq '显示'"}
+							<span class="label label-success radius">
+								{$vo.menu_visible}
+							</span>
+						{else /}
+							<span class="label radius">
+								{$vo.menu_visible}
+							</span>
+						{/if}
+					</td>
+					<td style="white-space:normal">
+						{volist name='vo.role' id='vo_r'}
+							<span title="{$vo_r.role_description}">{$vo_r.role_name}</span> /
+						{/volist}
+					</td>
+					<td style="white-space:normal">{$vo.create_time}</td>
+					<td style="white-space:normal">{$vo.update_time}</td>
+					<td class="td-manage">
+					{if condition="$vo.menu_visible eq '显示'"}
+						<a style="text-decoration:none" onClick="item_status(this,'{:url("admin/menu/do_menu_visible",["id"=>$vo.menu_id])}')" href="javascript:;" title="不显示"><i class="Hui-iconfont">&#xe631;</i></a> 
+					{else /}
+						<a style="text-decoration:none" onClick="item_status(this,'{:url("admin/menu/do_menu_visible",["id"=>$vo.menu_id])}')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe725;</i></a> 
+					{/if}
+						<a title="编辑" href="javascript:;" onclick="layer_show('编辑菜单','{:url("admin/menu/menu_edit",["id"=>$vo.menu_id])}','800','500');" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe647;</i></a> 
+						<a title="删除" href="javascript:;" onclick="item_delete(this,'{:url("admin/menu/do_menu_delete",["id"=>$vo.menu_id])}');" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+						<a title="添加子菜单" href="javascript:;" onclick="layer_show('添加菜单','{:url("admin/menu/menu_add",["fid"=>$vo.menu_id])}','800','500');" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe61f;</i></a>
+					</td>
+				</tr>
+				{/* 子菜单的名称一定要用menu_child才能分配到数据 */}
+				{volist name='vo.menu_child' id='vo_c'}
+					<tr class="text-c" title="{$vo_c.menu_description}">
+						<td><input type="checkbox" value="{$vo_c.menu_id}" name="to_multidelete[]"></td>
+						<td>{$vo_c.menu_id}</td>
+						<td class="text-l">└ <span class="name">{$vo_c.menu_name}</span></td>
+						<td class="text-l">{$vo_c.menu_route}</td>
+						<td>{$vo_c.menu_father_id}</td>
+						<td>{$vo_c.menu_sn}</td>
+						<td>
+							{if condition="$vo_c.menu_visible eq '显示'"}
+								<span class="label label-success radius">
+									{$vo_c.menu_visible}
+								</span>
+							{else /}
+								<span class="label radius">
+									{$vo_c.menu_visible}
+								</span>
+							{/if}
+						</td>
+						<td style="white-space:normal">
+							{volist name='vo_c.role' id='vo_c_r'}
+								<span title="{$vo_c_r.role_description}">{$vo_c_r.role_name}</span> /
+							{/volist}
+						</td>
+						<td style="white-space:normal">{$vo_c.create_time}</td>
+						<td style="white-space:normal">{$vo_c.update_time}</td>
+						<td class="td-manage">
+						{if condition="$vo_c.menu_visible eq '显示'"}
+							<a style="text-decoration:none" onClick="item_status(this,'{:url("admin/menu/do_menu_visible",["id"=>$vo_c.menu_id])}')" href="javascript:;" title="不显示"><i class="Hui-iconfont">&#xe631;</i></a> 
+						{else /}
+							<a style="text-decoration:none" onClick="item_status(this,'{:url("admin/menu/do_menu_visible",["id"=>$vo_c.menu_id])}')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe725;</i></a> 
+						{/if}
+							<a title="编辑" href="javascript:;" onclick="layer_show('编辑菜单','{:url("admin/menu/menu_edit",["id"=>$vo_c.menu_id])}','800','500');" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe647;</i></a> 
+							<a title="删除" href="javascript:;" onclick="item_delete(this,'{:url("admin/menu/do_menu_delete",["id"=>$vo_c.menu_id])}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+						</td>
+					</tr>
+				{/volist}
+			{/volist}
+			</tbody>
+		</table>
+		
+{/block}
+
+{block name='js'}
+{js href="__ROOT__/lib/laypage/1.2/laypage.js"/}
+<script type="text/javascript">
+// 显示/不显示模块
+function item_status(obj,url) {
+	// 为了友好，取到要操作模块的“菜单名称”字段，要在提示语中使用
+	var name = $(obj).parents("tr").find(".name").html();
+	// 用layer.confirm插件进行操作确认
+	layer.confirm("确认要切换“"+name+"”的状态吗？", function() {
+		// 当layer.confirm被确认后开始提交操作
+		// $.get(url, data, success)
+		$.get(url, function(data) {
+			// 请求控制器方法，传递module_id参数，执行回调函数，用data接收返回值
+			if(data.status==1) {
+				// 返回状态码是1，提示操作成功，并刷新页面
+				layer.msg(data.message, {icon:6, time:1500});
+				setTimeout(function() {
+					window.location.reload();
+				}, 2000);
+			} else {
+				// 返回状态码不是1，提示失败信息，不再刷新页面
+				layer.msg(data.message, {icon:5, time:3000});
+			}
+		});
+	})
+}
+
+// 删除模块
+function item_delete(obj, url) {
+	// 为了友好，取到要操作模块的“菜单名称”字段，要在提示语中使用
+	var name = $(obj).parents("tr").find(".name").html();
+	// 用layer.confirm插件进行操作确认
+	layer.confirm("确认要删除“"+name+"”吗？", function() {
+		// 当layer.confirm被确认后开始提交操作
+		// $.get(url, data, success)
+		$.get(url, function(data) {
+			if(data.status==1) {
+				// 返回状态码是1，提示操作成功，并刷新页面
+				layer.msg(data.message, {icon:6, time:1500});
+				setTimeout(function() {
+					window.location.reload();
+				}, 2000);
+			} else {
+				// 返回状态码不是1，提示失败信息，不再刷新页面
+				layer.msg(data.message, {icon:5, time:3000});
+			}
+		});	
+	});
+}
+
+// 批量删除
+function item_multidelete(url) {
+	// 定义一个数组用于保存已被选中的checkbox
+	var ids = new Array();
+	// 遍历名为to_multidelete[]的checkbox
+	$("input[name='to_multidelete[]").each(function() {
+		if($(this).is(":checked")) {
+			// 把被选中的checkbox的value值保存到module_ids中
+			ids.push($(this).val());
+		}
+	});
+	// 判断一下数组的长度，如果是0，则不用麻烦服务器了
+	if(ids.length == 0) {
+		layer.msg("没有选中任何数据", {icon:5, time:2000});
+	} else {
+		// 确实有被选中的记录，页面进行一次确认
+		layer.confirm("确定要删除这些数据吗？", function() {
+			// 用$.post()方法去调用控制器中的方法
+			// $.post(url,data,success)
+			$.post(
+				url
+				, {ids: ids}
+				, function(data) {
+					if(data.status==0) {
+						layer.msg(data.message, {icon:5, time:3000});
+					} else {
+						layer.msg(data.message, {icon:6, time:2000});
+						
+					}
+					setTimeout(function() {
+							window.location.reload();
+						}, 3000);
+			});
+		});
+	}
+}
+
+</script>
+{/block}
+
+{block name='css'}
+<style type="text/css" media="screen">
+	
+</style>
+{/block}

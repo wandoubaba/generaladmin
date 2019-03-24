@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+{include file='common@general/meta' /}
+{include file='common@general/css' /}
+{include file='general/css' /}
+{block name='seo'}
+	{include file='common@general/seo' /}
+{/block}
+</head>
+<body>
+{include file='general/header' /}
+{include file='general/menu' /}
+<section class="Hui-article-box">
+	
+	<nav class="breadcrumb">
+		<i class="Hui-iconfont"></i> <a href="{:url('admin/home/index')}" class="maincolor">首页</a> 
+		<span class="c-999 en">&gt;</span>
+		{block name='nav'}
+			{// 已经在nav标签内且不包含“首页”结点}
+		{/block}
+	</nav>
+	<div class="Hui-article">
+		<article class="cl pd-20">
+		{block name='main'}
+			{// 页面主体，已经在artical标签内}
+		{/block}
+	</article>
+
+{include file='general/footer' /}
+</div>
+</section>
+
+{include file='common@general/js' /}
+{include file='general/js' /}
+{block name='js'}
+	{// 页面自定义脚本}
+{/block}
+
+{block name='css'}
+	{// 页面自定义样式}
+{/block}
+</body>
+</html>

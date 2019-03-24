@@ -1,0 +1,111 @@
+﻿{extend name='common@general/base'/}
+{block name="css"}
+	{css href="__ROOT__/static/h-ui.admin/css/H-ui.login.css"/}
+	{css href="__ROOT__/static/this/css/common.admin.css"/}
+{/block}
+{block name="body"}
+	<div class="header">
+		<div class="pd-10 f-30 c-white">
+			{$title|default='通用管理后台'}
+		</div>
+	</div>
+	<div class="loginWraper">
+		<div id="loginform" class="loginBox">
+			<form class="form form-horizontal" method="post">
+				<div class="row cl">
+					<label class="form-label col-xs-3"><i class="Hui-iconfont">&#xe60d;</i></label>
+					<div class="formControls col-xs-8">
+						<input id="admin_name" name="admin_name" type="text" placeholder="用户名" class="input-text size-L" rangelength="[4,25]" required />
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-xs-3"><i class="Hui-iconfont">&#xe60e;</i></label>
+					<div class="formControls col-xs-8">
+						<input id="admin_password" name="admin_password" type="password" placeholder="密码" class="input-text size-L" rangelength="[4,25]" required />
+					</div>
+				</div>
+				<div class="row cl">
+					<div class="formControls col-xs-8 col-xs-offset-3">
+						<input id="captcha" name="captcha" class="input-text size-L" type="text" placeholder="验证码" required />
+					</div>
+					<div class="formControls col-xs-8 col-xs-offset-3">          
+						<img id="captcha_img" src="{:url('admin/index/login_captcha')}"> <a id="kanbuq" href="javascript:;">换一张</a> 
+					</div>
+				</div>
+				<div class="row cl">
+					<div class="formControls col-xs-8 col-xs-offset-3">
+						<input type="submit" class="btn btn-success radius size-L" style="width:80%;" value="&nbsp;登&nbsp;&nbsp;&nbsp;&nbsp;录&nbsp;">
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="footer">Copyright ChenQiang by ThinkPHP v5.0 & H-ui.admin v3.1</div>
+{/block}
+{block name="js"}
+	{js href="__ROOT__/lib/jquery.validation/1.14.0/jquery.validate.js"/}
+	{js href="__ROOT__/lib/jquery.validation/1.14.0/validate-methods.js"/}
+	{js href="__ROOT__/lib/jquery.validation/1.14.0/messages_zh.js"/}
+	{js href="__ROOT__/static/this/js/common.admin.js" /}
+	<!-- 自定义脚本部分 -->
+	<script type="text/javascript">
+	// 刷新验证码
+	function refreshCaptcha() {
+		// 以当前时间初始化随机参数
+		var t = Date.parse(new Date());
+		var src = $("#captcha_img").attr("src");
+		// 对验证码图片的src属性重新赋值
+		$("#captcha_img").attr("src",src+"?t="+t);
+		// 清空验证码文本框
+		$("#captcha").val("");
+	}
+
+	// 页面加载后执行操作
+	$(function() {
+		// 判断页面是否在框架中，如果在，则跳到顶级页面中显示
+		if(top != self){  
+			top.location.href = "{:url('admin/index/index')}";
+		}
+
+		// 为验证码图片和更换按钮绑定点击动作
+		$("#captcha_img,#kanbuq").on("click",function() {
+			refreshCaptcha();
+		});
+
+		// 监听键盘动作实现回车键提交
+		$(document).keypress(function(e) {
+			if(e.keyCode == 13) {
+				$("#login").trigger("click");
+			}
+		});
+
+		// 执行表单验证，并在验证通过后提交
+		$("form").validate({
+			submitHandler: function(form) {
+				// 当验证通过时执行ajax提交
+				$.ajax({
+					type: "POST", // POST方法提交
+					url: "{:url('admin/index/do_login')}", // 执行的方法
+					data: $("form").serialize(),  // 将表单控件的name属性序列化后提交
+					dataType: "json", // 数据类型为json
+					success: function(data) {
+						// 当ajax请求执行成功时执行
+						if (data.status == true) {
+							// 返回data对象中的status元素值为1表示数据插入成功
+							layer.msg(data.message, {icon: 6, time: 1000}); // 使用H-ui的浮动提示框，2秒后自动消失
+							setTimeout(function() {
+								parent.location.href = "{:url('admin/home/index')}";
+							}, 1300); //2秒后对父页面执行刷新（相当于关闭了弹层同时更新了数据）
+						} else {
+							// 返回data对象的status值不为1，表示数据插入失败
+							layer.msg(data.message, {icon: 5, time: 1000}); // 使用H-ui的浮动提示框，2秒后自动消失
+							refreshCaptcha(); // 重置一下验证码
+							// 页面停留在这里，不再执行任何动作
+						}
+					}
+				});
+			}
+		});
+	});
+	</script>
+{/block}
